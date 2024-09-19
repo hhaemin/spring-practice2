@@ -1,5 +1,7 @@
 package com.github.supercoding.web.controller;
 
+import com.github.supercoding.repository.ElectronicStoreItemRepository;
+import com.github.supercoding.repository.ItemEntity;
 import com.github.supercoding.web.dto.Item;
 import com.github.supercoding.web.dto.ItemBody;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 public class ElectronicStoreController {
 
+    private ElectronicStoreItemRepository electronicStoreItemRepository;
+
+    public ElectronicStoreController(ElectronicStoreItemRepository electronicStoreItemRepository) {
+        this.electronicStoreItemRepository = electronicStoreItemRepository;
+    }
+
     private static int serialItemId = 1;
     private List<Item> items = Arrays.asList(
             new Item(String.valueOf(serialItemId++), "Apple iPhone 12 Pro Max", "Smartphone", 1490000, "A14 Bionic", "512GB"),
@@ -25,14 +33,17 @@ public class ElectronicStoreController {
 
     @GetMapping("/items")
     public List<Item> findAllItem(){
-        return items;
+        List<ItemEntity> itemEntities = electronicStoreItemRepository.findAllItems();
+        return itemEntities.stream().map(Item::new).collect(Collectors.toList());
     }
 
     @PostMapping("/items")
     public String registerItem(@RequestBody ItemBody itemBody){
-        Item newItem = new Item(serialItemId++, itemBody);
-        items.add(newItem);
-        return "ID: " + newItem.getId();
+        ItemEntity itemEntity = new ItemEntity(null, itemBody.getName(), itemBody.getType(),
+                itemBody.getPrice(), itemBody.getSpec().getCpu(), itemBody.getSpec().getCapacity());
+
+        Integer itemId = electronicStoreItemRepository.saveItem(itemEntity);
+        return "ID: " + itemId;
     }
 
     @GetMapping("/items/{id}")
@@ -74,16 +85,14 @@ public class ElectronicStoreController {
 
     @PutMapping("/items/{id}")
     public Item updateItem(@PathVariable String id, @RequestBody ItemBody itemBody){
-        Item itemFounded = items.stream()
-                .filter((item) -> item.getId().equals(id))
-                .findFirst()
-                .orElseThrow(()-> new RuntimeException());
 
-        items.remove(itemFounded);
+        Integer idInt = Integer.valueOf(id);
+        ItemEntity itemEntity = new ItemEntity(idInt, itemBody.getName(), itemBody.getType(),
+                itemBody.getPrice(), itemBody.getSpec().getCpu(), itemBody.getSpec().getCapacity());
 
-        Item itemUpdated = new Item(Integer.valueOf(id), itemBody);
-        items.add(itemUpdated);
+        ItemEntity itemEntityUpdated = electronicStoreItemRepository.updateItemEntity(idInt, itemEntity);
 
+        Item itemUpdated = new Item(itemEntityUpdated);
         return itemUpdated;
     }
 }
