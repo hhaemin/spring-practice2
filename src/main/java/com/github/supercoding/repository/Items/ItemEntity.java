@@ -1,4 +1,4 @@
-package com.github.supercoding.repository;
+package com.github.supercoding.repository.Items;
 
 import java.util.Objects;
 
@@ -7,6 +7,8 @@ public class ItemEntity {
     private String name;
     private String type;
     private Integer price;
+    private Integer storeId;
+    private Integer stock;
     private String cpu;
     private String capacity;
 
@@ -15,6 +17,19 @@ public class ItemEntity {
         this.name = name;
         this.type = type;
         this.price = price;
+        this.storeId = null;
+        this.stock = 0;
+        this.cpu = cpu;
+        this.capacity = capacity;
+    }
+
+    public ItemEntity(Integer id, String name, String type, Integer price, Integer storeId, Integer stock, String cpu, String capacity) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.price = price;
+        this.storeId = storeId;
+        this.stock = stock;
         this.cpu = cpu;
         this.capacity = capacity;
     }
@@ -65,6 +80,22 @@ public class ItemEntity {
 
     public void setCapacity(String capacity) {
         this.capacity = capacity;
+    }
+
+    public Integer getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Integer storeId) {
+        this.storeId = storeId;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 
     @Override
