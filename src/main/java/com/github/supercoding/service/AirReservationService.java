@@ -9,9 +9,11 @@ import com.github.supercoding.repository.reservatios.Reservation;
 import com.github.supercoding.repository.reservatios.ReservationRepository;
 import com.github.supercoding.repository.users.UserEntity;
 import com.github.supercoding.repository.users.UserRepository;
+import com.github.supercoding.service.mapper.TicketMapper;
 import com.github.supercoding.web.dto.airline.ReservationRequest;
 import com.github.supercoding.web.dto.airline.ReservationResult;
 import com.github.supercoding.web.dto.airline.Ticket;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +22,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AirReservationService {
 
-    private UserRepository userRepository;
-    private AirlineTicketRepository airlineTicketRepository;
-    private PassengerRepository passengerRepository;
-    private ReservationRepository reservationRepository;
-
-    public AirReservationService(UserRepository userRepository, AirlineTicketRepository airlineTicketRepository, PassengerRepository passengerRepository, ReservationRepository reservationRepository) {
-        this.userRepository = userRepository;
-        this.airlineTicketRepository = airlineTicketRepository;
-        this.passengerRepository = passengerRepository;
-        this.reservationRepository = reservationRepository;
-    }
+    private final UserRepository userRepository;
+    private final AirlineTicketRepository airlineTicketRepository;
+    private final PassengerRepository passengerRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<Ticket> findUserFavoritePlaceTickets(Integer userId, String ticketType) {
         // 필요한 Reposiotory : UserRepository, airlineTicket Reposiotory
@@ -45,7 +41,7 @@ public class AirReservationService {
         List<AirlineTicket> airlineTickets
                 = airlineTicketRepository.findAllAirlineTicketWithPlaceAndTicketType(likePlace, ticketType);
 
-        List<Ticket> tickets = airlineTickets.stream().map(Ticket::new).collect(Collectors.toList());
+        List<Ticket> tickets = airlineTickets.stream().map(TicketMapper.INSTANCE::airlineTicketToTicket).collect(Collectors.toList());
         return tickets;
     }
 

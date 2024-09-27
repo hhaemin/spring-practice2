@@ -5,6 +5,7 @@ import com.github.supercoding.web.dto.airline.ReservationRequest;
 import com.github.supercoding.web.dto.airline.ReservationResult;
 import com.github.supercoding.web.dto.airline.Ticket;
 import com.github.supercoding.web.dto.airline.TicketResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 @RequestMapping("/v1/api/air-reservation")
 public class AirReservationController {
 
-    public AirReservationService airReservationService;
+    public final AirReservationService airReservationService;
 
     public AirReservationController(AirReservationService airReservationService) {
         this.airReservationService = airReservationService;

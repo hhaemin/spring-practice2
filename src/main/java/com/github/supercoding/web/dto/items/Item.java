@@ -1,4 +1,4 @@
-package com.github.supercoding.web.dto;
+package com.github.supercoding.web.dto.items;
 
 import com.github.supercoding.repository.Items.ItemEntity;
 
