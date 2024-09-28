@@ -1,9 +1,11 @@
 package com.github.supercoding.web.dto.items;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class Spec {
 
-    private String cpu;
-    private String capacity;
+    @Schema(name = "cpu", description = "Item cpu", example = "Google Tensor")private String cpu;
+    @Schema(name = "capacity", description = "Item 용량 Spec", example = "25G")private String capacity;
 
     public Spec() {
     }
