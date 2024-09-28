@@ -1,9 +1,14 @@
 package com.github.supercoding.web.dto.items;
 
 import com.github.supercoding.repository.Items.ItemEntity;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Objects;
 
+@ToString
 public class Item {
     private String id;
     private String name;
@@ -22,7 +27,7 @@ public class Item {
         this.spec = itemBody.getSpec();
     }
     public Item(ItemEntity itemEntity){
-        this.id = itemEntity.getCapacity();
+        this.id = itemEntity.getId().toString();
         this.type = itemEntity.getType();
         this.price = itemEntity.getPrice();
         this.name = itemEntity.getName();
