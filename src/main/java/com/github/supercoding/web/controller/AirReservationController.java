@@ -32,34 +32,18 @@ public class AirReservationController {
 
     @Operation(summary = "선호하는 ticket 탐색")
     @GetMapping("/tickets")
-    public ResponseEntity findAirlineTickets(
+    public TicketResponse findAirlineTickets(
             @Parameter(name = "user-Id", description = "유저 ID", example = "1") @RequestParam("userId") Integer userId,
             @Parameter(name = "airline-ticket-type", description = "항공권 타입", example = "왕복|편도")@RequestParam("airlineTicketType") String ticketType) {
-        try {
             List<Ticket> tickets = airReservationService.findUserFavoritePlaceTickets(userId, ticketType);
-            TicketResponse ticketResponse = new TicketResponse(tickets);
-            return new ResponseEntity(ticketResponse, HttpStatus.OK);
-        } catch (InvalidValueException ive){
-            log.error("Client 요청에 문제가 있어 다음처럼 출력합니다. " + ive.getMessage());
-            return new ResponseEntity(ive.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (NotFoundException nfe) {
-            log.error("Client 요청이후 DB 검색 중 에러로 다음처럼 출력합니다. " + nfe.getMessage());
-            return new ResponseEntity(nfe.getMessage(), HttpStatus.NOT_FOUND);
-        }
+            return new TicketResponse(tickets);
     }
 
     @Operation(summary = "User와 Ticket Id로 예약 진행")
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
-    public ResponseEntity makeReservation(@RequestBody ReservationRequest reservationRequest){
-        try{
-            ReservationResult reservationResult = airReservationService.makeReservation(reservationRequest);
-            return new ResponseEntity(reservationResult, HttpStatus.CREATED);
-        } catch (NotFoundException nfe) {
-            log.error("Client 요청이후 DB 검색 중 에러로 다음처럼 출력합니다. " + nfe.getMessage());
-            return new ResponseEntity(nfe.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (NotAcceptException nae) {
-            log.error("Client 요청이 모종의 이유로 거부됩니다." + nae.getMessage());
-            return new ResponseEntity(nae.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-        }
+    public ReservationResult makeReservation(@RequestBody ReservationRequest reservationRequest){
+            return airReservationService.makeReservation(reservationRequest);
+
     }
 }
