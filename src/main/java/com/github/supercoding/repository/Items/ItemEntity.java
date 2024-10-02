@@ -1,15 +1,37 @@
 package com.github.supercoding.repository.Items;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.Objects;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(of="id")
+@ToString
+@Builder
+@Entity
+@Table(name = "item")
 public class ItemEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
+    @Column(name = "name", length = 50, nullable = false, unique = true)
     private String name;
+    @Column(name = "type", length = 20, nullable = false)
     private String type;
+    @Column(name = "price")
     private Integer price;
+    @Column(name="store_id")
     private Integer storeId;
+    @Column(name = "stock", columnDefinition = "DEFAULT 0 CHECK(stock) >= 0")
     private Integer stock;
+    @Column(name = "cpu", length = 30)
     private String cpu;
+    @Column(name = "capacity", length = 30)
     private String capacity;
 
     public ItemEntity(Integer id, String name, String type, Integer price, String cpu, String capacity) {
@@ -23,91 +45,4 @@ public class ItemEntity {
         this.capacity = capacity;
     }
 
-    public ItemEntity(Integer id, String name, String type, Integer price, Integer storeId, Integer stock, String cpu, String capacity) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.price = price;
-        this.storeId = storeId;
-        this.stock = stock;
-        this.cpu = cpu;
-        this.capacity = capacity;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public String getCpu() {
-        return cpu;
-    }
-
-    public String getCapacity() {
-        return capacity;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
-    public void setCpu(String cpu) {
-        this.cpu = cpu;
-    }
-
-    public void setCapacity(String capacity) {
-        this.capacity = capacity;
-    }
-
-    public Integer getStoreId() {
-        return storeId;
-    }
-
-    public void setStoreId(Integer storeId) {
-        this.storeId = storeId;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ItemEntity that = (ItemEntity) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
 }
