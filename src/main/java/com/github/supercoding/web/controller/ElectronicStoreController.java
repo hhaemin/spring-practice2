@@ -101,4 +101,23 @@ public class ElectronicStoreController {
         Integer orderItemNums = electronicStoreItemService.buyItems(buyOrder);
         return "요청하신 Item 중 " + orderItemNums + "개를 구매하였습니다.";
     }
+
+    @Operation(summary = "모든 Item types 검색 (쿼리문)")
+    @GetMapping("/items-types")
+    public List<Item> findItemByTypes(
+            @Parameter(name="ids", description="item IDs", example = "1,2,3")
+            @RequestParam("type") List<String> types){
+        log.info("/items-types 요청 ids: " + types);
+        List<Item> items = electronicStoreItemService.findItemsByTypes(types);
+        log.info("/items-queries 응답 : " + items);
+        return items;
+    }
+
+    @Operation(summary = "단일 Item id로 검색 (쿼리문)")
+    @GetMapping("/items-prices")
+    public List<Item> findItemByPrice(
+            @RequestParam("max") Integer maxValue){
+        return electronicStoreItemService.findItemsOrderByPrices(maxValue);
+    }
+
 }

@@ -109,4 +109,14 @@ public class ElectronicStoreItemService {
 
         return successBuyItemNums;
     }
+
+    public List<Item> findItemsByTypes(List<String> types) {
+        List<ItemEntity> itemEntities = electronicStoreItemJpaRepository.findItemEntitiesByTypeIn(types);
+        return itemEntities.stream().map(Item::new).collect(Collectors.toList());
+    }
+
+    public List<Item> findItemsOrderByPrices(Integer maxValue) {
+        List<ItemEntity> itemEntities = electronicStoreItemJpaRepository.findItemEntitiesByPriceLessThanEqualOrderByPriceAsc(maxValue);
+        return itemEntities.stream().map(Item::new).collect(Collectors.toList());
+    }
 }
