@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -118,6 +120,18 @@ public class ElectronicStoreController {
     public List<Item> findItemByPrice(
             @RequestParam("max") Integer maxValue){
         return electronicStoreItemService.findItemsOrderByPrices(maxValue);
+    }
+
+    @Operation(summary = "pagination 지원")
+    @GetMapping("/items-page")
+    public Page<Item> findItemPagination(Pageable pageable){
+        return electronicStoreItemService.findAllWithPagable(pageable);
+    }
+
+    @Operation(summary = "pagination 지원 2")
+    @GetMapping("/items-types-page")
+    public Page<Item> findItemPagination(@RequestParam("type") List<String> types, Pageable pageable){
+        return electronicStoreItemService.findAllWithPagable(types, pageable);
     }
 
 }
