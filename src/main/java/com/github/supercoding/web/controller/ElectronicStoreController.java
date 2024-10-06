@@ -6,7 +6,9 @@ import com.github.supercoding.web.dto.items.Item;
 import com.github.supercoding.web.dto.items.ItemBody;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 @Slf4j
 public class ElectronicStoreController {
 
@@ -25,20 +28,7 @@ public class ElectronicStoreController {
     // 하지만 선언할 때 logger 가 아닌 log로
 //    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private ElectronicStoreItemService electronicStoreItemService;
-
-    public ElectronicStoreController(ElectronicStoreItemService electronicStoreItemService) {
-        this.electronicStoreItemService = electronicStoreItemService;
-    }
-
-    private static int serialItemId = 1;
-    private List<Item> items = Arrays.asList(
-            new Item(String.valueOf(serialItemId++), "Apple iPhone 12 Pro Max", "Smartphone", 1490000, "A14 Bionic", "512GB"),
-            new Item(String.valueOf(serialItemId++), "Samsung Galaxy S21 Ultra", "Smartphone", 1690000, "Exynos 2100", "256GB"),
-            new Item(String.valueOf(serialItemId++), "Google Pixel 6 Pro", "Smartphone", 1290000, "Google Tensor", "128GB"),
-            new Item(String.valueOf(serialItemId++), "Dell XPS 15", "Laptop", 2290000, "Intel Core i9", "1TB SSD"),
-            new Item(String.valueOf(serialItemId++), "Sony Alpha 7 III", "Mirrorless Camera", 2590000, "BIONZ X", "No internal storage"),
-            new Item(String.valueOf(serialItemId++), "Microsoft Xbox Series X", "Gaming Console", 499000, "Custom AMD Zen 2", "1TB SSD"));
+    private final ElectronicStoreItemService electronicStoreItemService;
 
     @Operation(summary = "모든 Item 검색 ")
     @GetMapping("/items")
@@ -49,14 +39,14 @@ public class ElectronicStoreController {
         return items;
     }
 
-    @Operation(summary = "모든 Item 등록 ")
+    @Operation(summary = "단일 Item 등록 ")
     @PostMapping("/items")
     public String registerItem(@RequestBody ItemBody itemBody){
         Integer itemId = electronicStoreItemService.saveItem(itemBody);
         return "ID: " + itemId;
     }
 
-    @Operation(summary = "모든 Item id로 검색 ")
+    @Operation(summary = "단일 Item id로 검색 ")
     @GetMapping("/items/{id}")
     public Item findItemByPathId(
             @Parameter(name="id", description="item ID", example = "1")
@@ -64,7 +54,7 @@ public class ElectronicStoreController {
         return electronicStoreItemService.findItemByInt(id);
     }
 
-    @Operation(summary = "모든 Item id로 검색 (쿼리문)")
+    @Operation(summary = "단일 Item id로 검색 (쿼리문)")
     @GetMapping("/items-query")
     public Item findItemByQueryId(
             @Parameter(name="id", description="item ID", example = "1")
@@ -72,7 +62,7 @@ public class ElectronicStoreController {
         return electronicStoreItemService.findItemByInt(id);
     }
 
-    @Operation(summary = "모든 Item ids로 검색 (쿼리문)")
+    @Operation(summary = "여러 Item ids로 검색 (쿼리문)")
     @GetMapping("/items-queries")
     public List<Item> findItemByQueryIds(
             @Parameter(name="ids", description="item IDs", example = "1,2,3")
@@ -83,20 +73,20 @@ public class ElectronicStoreController {
         return items;
     }
 
-    @Operation(summary = "모든 Item id로 삭제 ")
+    @Operation(summary = "단일 Item id로 삭제 ")
     @DeleteMapping("/items/{id}")
     public String deleteItemByPathId(@PathVariable String id){
         electronicStoreItemService.deleteItem(id);
         return "Object with id = " + id + " has been deleted";
     }
 
-    @Operation(summary = "모든 Item id로 수정 ")
+    @Operation(summary = "단일 Item id로 수정 ")
     @PutMapping("/items/{id}")
     public Item updateItem(@PathVariable String id, @RequestBody ItemBody itemBody){
         return electronicStoreItemService.updateItem(id,itemBody);
     }
 
-    @Operation(summary = "모든 Item id로 구매 ")
+    @Operation(summary = "단일 Item 구매 ")
     @PostMapping("/items/buy")
     public String buyItem(@RequestBody BuyOrder buyOrder){
 
@@ -104,7 +94,7 @@ public class ElectronicStoreController {
         return "요청하신 Item 중 " + orderItemNums + "개를 구매하였습니다.";
     }
 
-    @Operation(summary = "모든 Item types 검색 (쿼리문)")
+    @Operation(summary = "여러 Item types 검색 (쿼리문)")
     @GetMapping("/items-types")
     public List<Item> findItemByTypes(
             @Parameter(name="ids", description="item IDs", example = "1,2,3")
@@ -124,7 +114,7 @@ public class ElectronicStoreController {
 
     @Operation(summary = "pagination 지원")
     @GetMapping("/items-page")
-    public Page<Item> findItemPagination(Pageable pageable){
+    public Page<Item> findItemsPagination(Pageable pageable){
         return electronicStoreItemService.findAllWithPagable(pageable);
     }
 
@@ -133,5 +123,11 @@ public class ElectronicStoreController {
     public Page<Item> findItemPagination(@RequestParam("type") List<String> types, Pageable pageable){
         return electronicStoreItemService.findAllWithPagable(types, pageable);
     }
+
+//    @Operation("전체 Stores 정보 검색")
+//    @GetMapping("/stores")
+//    public List<StoreInfo> findAllStores(){
+//        return electronicStoreItemService.findAllStoreInfo();
+//    }
 
 }

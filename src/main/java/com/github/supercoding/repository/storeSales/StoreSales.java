@@ -1,8 +1,10 @@
 package com.github.supercoding.repository.storeSales;
 
+import com.github.supercoding.repository.Items.ItemEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -22,4 +24,7 @@ public class StoreSales {
     private String storeName;
     @Column(name = "amount", nullable = false, columnDefinition = "DEFAULT 0 CHECK(amount) >= 0")
     private Integer amount;
+
+    @OneToMany(mappedBy = "storeSales", fetch = FetchType.EAGER)
+    private List<ItemEntity> itemEntities;
 }
