@@ -1,4 +1,4 @@
-package com.github.supercoding.repository.reservatios;
+package com.github.supercoding.repository.reservations;
 
 import lombok.*;
 

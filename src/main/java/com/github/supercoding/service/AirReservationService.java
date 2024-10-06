@@ -5,8 +5,8 @@ import com.github.supercoding.repository.airlineTicket.AirlineTicketAndFlightInf
 import com.github.supercoding.repository.airlineTicket.AirlineTicketRepository;
 import com.github.supercoding.repository.passenger.Passenger;
 import com.github.supercoding.repository.passenger.PassengerRepository;
-import com.github.supercoding.repository.reservatios.Reservation;
-import com.github.supercoding.repository.reservatios.ReservationRepository;
+import com.github.supercoding.repository.reservations.Reservation;
+import com.github.supercoding.repository.reservations.ReservationRepository;
 import com.github.supercoding.repository.users.UserEntity;
 import com.github.supercoding.repository.users.UserRepository;
 import com.github.supercoding.service.exceptions.InvalidValueException;

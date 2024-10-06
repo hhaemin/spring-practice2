@@ -1,5 +1,9 @@
 package com.github.supercoding.repository.airlineTicket;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.sql.Date;
@@ -11,14 +15,26 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of="ticketId")
 @ToString
 @NoArgsConstructor
+@Entity
+@Table(name = "airline_ticket")
 public class AirlineTicket {
+    @Id @Column(name = "ticket_id")
     private Integer ticketId;
+    @Column(name = "ticket_type", length = 5, columnDefinition = "CHECK (ticket_type in ('편도','왕복')) ")
     private String ticketType;
+    @Column(name = "departure_loc", length = 20)
     private String departureLocation;
+    @Column(name = "arrival_loc", length = 20)
     private String arrivalLocation;
+
+    @Column(name = "departure_at",nullable = false)
     private LocalDateTime departureAt;
+    @Column(name = "return_at", nullable = false)
     private LocalDateTime returnAt;
+
+    @Column(name = "tax")
     private Double tax;
+    @Column(name = "total_price")
     private Double totalPrice;
 
     @Builder
