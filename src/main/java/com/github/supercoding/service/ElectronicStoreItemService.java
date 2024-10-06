@@ -6,6 +6,7 @@ import com.github.supercoding.repository.Items.ItemEntity;
 import com.github.supercoding.repository.storeSales.StoreSales;
 import com.github.supercoding.repository.storeSales.StoreSalesJpaRepository;
 import com.github.supercoding.repository.storeSales.StoreSalesRepository;
+import com.github.supercoding.service.exceptions.NotFoundException;
 import com.github.supercoding.web.dto.items.BuyOrder;
 import com.github.supercoding.web.dto.items.Item;
 import com.github.supercoding.web.dto.items.ItemBody;
@@ -88,7 +89,7 @@ public class ElectronicStoreItemService {
 
         ItemEntity itemEntity = electronicStoreItemRepository.findItemById(itemId);
 
-        if(itemEntity.getStoreId() == null) throw new RuntimeException("매장을 찾을 수 없습니다.");
+        if(itemEntity.getStoreSales().isEmpty()) throw new RuntimeException("매장을 찾을 수 없습니다.");
         if(itemEntity.getStock() <= 0) throw new RuntimeException("상품의 재고가 없습니다.");
 
         Integer successBuyItemNums;
@@ -106,9 +107,9 @@ public class ElectronicStoreItemService {
         }
 
         // 매장 매상 추가
-        StoreSales storeSales = storeSalesRepository.findStoreSalesById(itemEntity.getStoreId());
-        storeSalesRepository.updateSalesAmount(itemEntity.getStoreId(), storeSales.getAmount() + totalPrice );
+        StoreSales storeSales = itemEntity.getStoreSales().orElseThrow(() -> new NotFoundException("요청하신 StoreId에 해당하는 StoreSale 없습니다."));
 
+        storeSales.setAmount(storeSales.getAmount() + totalPrice);
         return successBuyItemNums;
     }
 

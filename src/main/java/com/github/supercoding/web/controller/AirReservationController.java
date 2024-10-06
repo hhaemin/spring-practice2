@@ -7,6 +7,7 @@ import com.github.supercoding.web.dto.airline.Ticket;
 import com.github.supercoding.web.dto.airline.TicketResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +16,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/v1/api/air-reservation")
+@RequiredArgsConstructor
 @Slf4j
 public class AirReservationController {
 
     public final AirReservationService airReservationService;
-
-    public AirReservationController(AirReservationService airReservationService) {
-        this.airReservationService = airReservationService;
-    }
 
     @Operation(summary = "선호하는 ticket 탐색")
     @GetMapping("/tickets")
@@ -39,5 +37,15 @@ public class AirReservationController {
     public ReservationResult makeReservation(@RequestBody ReservationRequest reservationRequest){
             return airReservationService.makeReservation(reservationRequest);
 
+    }
+
+    @Operation(summary = "userId의 예약한 항공편과 수수료 총합")
+    @GetMapping("/users-sum-price")
+    public Double findUserFlightSumPrice(
+            @Parameter(name = "user-Id", description = "유저 ID", example = "1") @RequestParam("user-id") Integer userId
+    )
+    {
+        Double sum = airReservationService.findUserFlightSumPrice(userId);
+        return sum;
     }
 }

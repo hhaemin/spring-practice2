@@ -1,13 +1,12 @@
 package com.github.supercoding.repository.airlineTicket;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.github.supercoding.repository.flight.Flight;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -36,6 +35,9 @@ public class AirlineTicket {
     private Double tax;
     @Column(name = "total_price")
     private Double totalPrice;
+
+    @OneToMany(mappedBy = "airlineTicket")
+    private List<Flight> flightList;
 
     @Builder
     public AirlineTicket(Integer ticketId, String ticketType, String departureLocation, String arrivalLocation, Date departureAt, Date returnAt, Double tax, Double totalPrice) {

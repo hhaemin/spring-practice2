@@ -2,12 +2,18 @@ package com.github.supercoding.service;
 
 import com.github.supercoding.repository.airlineTicket.AirlineTicket;
 import com.github.supercoding.repository.airlineTicket.AirlineTicketAndFlightInfo;
+import com.github.supercoding.repository.airlineTicket.AirlineTicketJpaRepository;
 import com.github.supercoding.repository.airlineTicket.AirlineTicketRepository;
+import com.github.supercoding.repository.flight.Flight;
 import com.github.supercoding.repository.passenger.Passenger;
+import com.github.supercoding.repository.passenger.PassengerJpaRepository;
 import com.github.supercoding.repository.passenger.PassengerRepository;
+import com.github.supercoding.repository.reservations.FlightPriceAndCharge;
 import com.github.supercoding.repository.reservations.Reservation;
+import com.github.supercoding.repository.reservations.ReservationJpaRepository;
 import com.github.supercoding.repository.reservations.ReservationRepository;
 import com.github.supercoding.repository.users.UserEntity;
+import com.github.supercoding.repository.users.UserJpaRepository;
 import com.github.supercoding.repository.users.UserRepository;
 import com.github.supercoding.service.exceptions.InvalidValueException;
 import com.github.supercoding.service.exceptions.NotAcceptException;
@@ -27,10 +33,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AirReservationService {
 
-    private final UserRepository userRepository;
-    private final AirlineTicketRepository airlineTicketRepository;
-    private final PassengerRepository passengerRepository;
-    private final ReservationRepository reservationRepository;
+    private final UserJpaRepository userJpaRepository;
+    private final AirlineTicketJpaRepository airlineTicketJpaRepository;
+
+    private final PassengerJpaRepository passengerJpaRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
 
     public List<Ticket> findUserFavoritePlaceTickets(Integer userId, String ticketType) {
         // 필요한 Reposiotory : UserRepository, airlineTicket Reposiotory
@@ -40,17 +47,17 @@ public class AirReservationService {
 
         Set<String> ticketTypeSet = new HashSet<>(Arrays.asList("편도", "왕복"));
 
-        if( !ticketTypeSet.contains(ticketType) )
+        if (!ticketTypeSet.contains(ticketType))
             throw new InvalidValueException("해당 TicketType " + ticketType + "은 지원하지 않습니다.");
 
-        UserEntity userEntity = userRepository.findUserById(userId).orElseThrow(
-                () -> new NotFoundException("해당 ID: " + userId+ " 유저를 찾을 수 없습니다."));
+        UserEntity userEntity = userJpaRepository.findById(userId).orElseThrow(
+                () -> new NotFoundException("해당 ID: " + userId + " 유저를 찾을 수 없습니다."));
         String likePlace = userEntity.getLikeTravelPlace();
 
         List<AirlineTicket> airlineTickets
-                = airlineTicketRepository.findAllAirlineTicketWithPlaceAndTicketType(likePlace, ticketType);
+                = airlineTicketJpaRepository.findAirlineTicketsByArrivalLocationAndTicketType(likePlace, ticketType);
 
-        if(airlineTickets.isEmpty())
+        if (airlineTickets.isEmpty())
             throw new NotFoundException("해당 likePlace: " + likePlace + " 와 TicketType: " + ticketType + "에 해당하는 항공권 찾을 수 없습니다.");
 
         List<Ticket> tickets = airlineTickets.stream().map(TicketMapper.INSTANCE::airlineTicketToTicket).collect(Collectors.toList());
@@ -66,34 +73,46 @@ public class AirReservationService {
         Integer airlineTicketId = reservationRequest.getAirlineTicketId();
 
         // 1. Passenger Id
-        Passenger passenger = passengerRepository.findPassengerByUserId(userId)
+        Passenger passenger = passengerJpaRepository.findPassengerByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("요청하신 userId " + userId + "에 해당하는 Passenger를 찾을 수 없습니다."));
-        Integer passengerId = passenger.getPassengerId();
+//        Integer passengerId = passenger.getPassengerId();
 
         // 2. price 등의 정보 불러오기
-        List<AirlineTicketAndFlightInfo> airlineTicketAndFlightInfo
-                = airlineTicketRepository.findAllAirLineTicketAndFlightInfo(airlineTicketId);
+        List<Flight> flightList = airlineTicket.getFlightList();
 
-        if(airlineTicketAndFlightInfo.isEmpty())
+        if (flightList.isEmpty())
             throw new NotFoundException("AirlineTicket Id " + airlineTicketId + " 에 해당하는 항공편과 항공권을 찾을 수 없습니다.");
 
-
-        // 3. reservation 생성
         Boolean isSuccess = false;
 
-        Reservation reservation = new Reservation(passengerId, airlineTicketId);
-        try{
-            isSuccess = reservationRepository.saveReservation(reservation);
+        // 3. reservation 생성
+
+        Reservation reservation = new Reservation(passenger, airlineTicket);
+        try {
+            reservationJpaRepository.save(reservation);
+            isSuccess = true;
         } catch (RuntimeException e) {
             throw new NotAcceptException("Reservation이 등록되는 과정에 거부되었습니다.");
         }
 
         // ReservationResult DTO 만들기
-        List<Integer> prices = airlineTicketAndFlightInfo.stream().map(AirlineTicketAndFlightInfo::getPrice).collect(Collectors.toList());
-        List<Integer> charges = airlineTicketAndFlightInfo.stream().map(AirlineTicketAndFlightInfo::getCharge).collect(Collectors.toList());
-        Integer tax = airlineTicketAndFlightInfo.stream().map(AirlineTicketAndFlightInfo::getTax).findFirst().get();
-        Integer totalPrice = airlineTicketAndFlightInfo.stream().map(AirlineTicketAndFlightInfo::getTotalPrice).findFirst().get();
+        List<Integer> prices = flightList.stream().map(Flight::getFlightPrice).map(Double::intValue).collect(Collectors.toList());
+        List<Integer> charges = flightList.stream().map(Flight::getCharge).map(Double::intValue).collect(Collectors.toList());
+        Integer tax = airlineTicket.getTax().intValue();
+        Integer totalPrice = airlineTicket.getTotalPrice().intValue();
 
         return new ReservationResult(prices, charges, tax, totalPrice, isSuccess);
+    }
+
+    public Double findUserFlightSumPrice(Integer userId) {
+        // 1. flight_price , Charge 구하기
+        List<FlightPriceAndCharge> flightPriceAndCharges = reservationJpaRepository.findFlightPriceAndCharge(userId);
+
+        // 2. 모든 Flight_price와 charge의 각각 합을 구하고
+        Double flightSum = flightPriceAndCharges.stream().mapToDouble(FlightPriceAndCharge::getFlightPrice).sum();
+        Double chargeSum = flightPriceAndCharges.stream().mapToDouble(FlightPriceAndCharge::getCharge).sum();
+
+        // 3. 두개의 합을 다시 더하고 Return
+        return flightSum + chargeSum;
     }
 }
